@@ -12,13 +12,9 @@
     <style>
         :root {
             --primary: #f1c40f;
-            --secondary: #ff8c3a;
             --danger: #e74c3c;
             --success: #2ecc71;
-            --cyan: #5dade2;
-            --purple: #9b59b6;
-            --bg-dark: rgba(14, 18, 24, 0.88);
-            --panel: rgba(25, 32, 42, 0.82);
+            --panel: rgba(18, 24, 32, 0.86);
             --border: rgba(255,255,255,0.10);
             --text: #eef3f9;
             --muted: #99a8bb;
@@ -39,11 +35,6 @@
             font-family: var(--font-main);
             user-select: none;
             -webkit-user-select: none;
-            -webkit-user-drag: none;
-        }
-
-        canvas {
-            display: block;
         }
 
         #gameCanvas {
@@ -65,61 +56,21 @@
                 radial-gradient(circle at 20% 80%, rgba(46,204,113,0.08), transparent 28%),
                 radial-gradient(circle at 80% 70%, rgba(93,173,226,0.08), transparent 28%),
                 linear-gradient(180deg, #101821 0%, #06080c 100%);
-            overflow: hidden;
         }
-
-        .lobby-grid {
-            position: absolute;
-            inset: 0;
-            background-image:
-                linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
-            background-size: 48px 48px;
-            opacity: 0.18;
-            transform: perspective(800px) rotateX(70deg) scale(1.8);
-            transform-origin: center bottom;
-            animation: gridMove 18s linear infinite;
-            pointer-events: none;
-        }
-
-        @keyframes gridMove {
-            from { background-position: 0 0, 0 0; }
-            to { background-position: 0 800px, 800px 0; }
-        }
-
-        .floating-glow {
-            position: absolute;
-            width: 900px;
-            height: 900px;
-            border-radius: 50%;
-            filter: blur(120px);
-            opacity: 0.15;
-            pointer-events: none;
-        }
-
-        .glow-a { background: #f1c40f; top: -250px; left: -150px; }
-        .glow-b { background: #2ecc71; bottom: -260px; right: -160px; }
-        .glow-c { background: #3498db; top: 20%; right: -260px; width: 700px; height: 700px; }
 
         .lobby-wrap {
             width: min(980px, 94vw);
             display: grid;
             grid-template-columns: 1.1fr 0.9fr;
             gap: 26px;
-            align-items: stretch;
-            position: relative;
-            z-index: 2;
         }
 
         .hero-box,
         .panel {
             background: linear-gradient(180deg, rgba(33,40,52,0.80), rgba(17,22,28,0.78));
             border: 1px solid var(--border);
-            box-shadow:
-                0 20px 60px rgba(0,0,0,0.50),
-                inset 0 1px 0 rgba(255,255,255,0.06);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.50);
             backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
             border-radius: 28px;
         }
 
@@ -129,14 +80,11 @@
             flex-direction: column;
             justify-content: center;
             min-height: 560px;
-            position: relative;
-            overflow: hidden;
         }
 
         .hero-badge {
             display: inline-flex;
             align-items: center;
-            gap: 10px;
             width: fit-content;
             padding: 8px 14px;
             border-radius: 999px;
@@ -192,7 +140,6 @@
             border-radius: 16px;
             color: #dfe8f5;
             font-size: 15px;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
         }
 
         .panel {
@@ -206,7 +153,6 @@
         .panel-title {
             font-family: var(--font-title);
             font-size: 34px;
-            letter-spacing: 1px;
             margin: 0 0 8px 0;
         }
 
@@ -234,17 +180,6 @@
             font-family: var(--font-main);
             font-size: 18px;
             font-weight: 700;
-            transition: 0.22s ease;
-            box-shadow: inset 0 2px 8px rgba(0,0,0,0.28);
-        }
-
-        .input-field:focus {
-            border-color: rgba(241,196,15,0.65);
-            box-shadow: 0 0 0 3px rgba(241,196,15,0.12), inset 0 2px 8px rgba(0,0,0,0.28);
-        }
-
-        .input-field::placeholder {
-            color: rgba(255,255,255,0.25);
         }
 
         #clanName {
@@ -282,30 +217,17 @@
             justify-content: center;
             gap: 8px;
             position: relative;
-            overflow: hidden;
-            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
-        }
-
-        .char-box::before {
-            content: "";
-            position: absolute;
-            inset: -1px;
-            background: radial-gradient(circle at top, rgba(255,255,255,0.10), transparent 45%);
-            opacity: 0.65;
-            pointer-events: none;
+            transition: transform 0.18s ease, border-color 0.18s ease;
         }
 
         .char-box:hover {
             transform: translateY(-6px);
             border-color: rgba(241,196,15,0.50);
-            box-shadow: 0 14px 30px rgba(0,0,0,0.35);
         }
 
         .char-box.active {
             border-color: rgba(241,196,15,0.75);
-            box-shadow:
-                0 0 0 2px rgba(241,196,15,0.14),
-                0 16px 34px rgba(241,196,15,0.16);
+            box-shadow: 0 0 0 2px rgba(241,196,15,0.14);
         }
 
         .char-box.active::after {
@@ -329,7 +251,6 @@
             justify-content: center;
             border-radius: 16px;
             background: rgba(255,255,255,0.05);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
             overflow: hidden;
         }
 
@@ -342,7 +263,6 @@
 
         .char-preview .emoji {
             font-size: 52px;
-            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.35));
         }
 
         .char-name {
@@ -368,23 +288,7 @@
             color: white;
             font-family: var(--font-title);
             font-size: 28px;
-            letter-spacing: 1px;
             cursor: pointer;
-            box-shadow:
-                0 8px 0 #168047,
-                0 18px 28px rgba(0,0,0,0.35);
-            transition: transform 0.08s ease, filter 0.2s ease;
-        }
-
-        #playBtn:hover,
-        #restartBtn:hover { filter: brightness(1.06); }
-
-        #playBtn:active,
-        #restartBtn:active {
-            transform: translateY(8px);
-            box-shadow:
-                0 0 0 #168047,
-                0 8px 14px rgba(0,0,0,0.25);
         }
 
         .tip-box {
@@ -419,10 +323,9 @@
             gap: 18px;
             padding: 12px 20px;
             border-radius: 18px;
-            background: var(--bg-dark);
+            background: rgba(14, 18, 24, 0.88);
             border: 1px solid var(--border);
             backdrop-filter: blur(10px);
-            box-shadow: 0 12px 30px rgba(0,0,0,0.35);
             pointer-events: auto;
         }
 
@@ -437,25 +340,22 @@
         .topStat small {
             display: block;
             font-size: 11px;
-            letter-spacing: 1px;
             text-transform: uppercase;
             color: var(--muted);
         }
 
         #goldVal { color: #ffd85a; }
-        #armyVal, #popVal { color: #f2f6fb; }
         #scoreVal { color: #8bd8ff; }
 
         #lordzboard {
             position: absolute;
             top: 18px;
             right: 18px;
-            width: 275px;
-            background: var(--bg-dark);
+            width: 260px;
+            background: rgba(14, 18, 24, 0.88);
             border: 1px solid var(--border);
             border-radius: 20px;
             padding: 16px;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.35);
             backdrop-filter: blur(10px);
             pointer-events: auto;
         }
@@ -465,7 +365,6 @@
             font-size: 22px;
             font-family: var(--font-title);
             color: var(--primary);
-            letter-spacing: 1px;
             text-align: center;
         }
 
@@ -487,10 +386,6 @@
             font-weight: 700;
         }
 
-        #leaderList li:last-child {
-            border-bottom: none;
-        }
-
         #bottomRightBox {
             position: absolute;
             right: 18px;
@@ -510,7 +405,6 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            box-shadow: 0 12px 28px rgba(0,0,0,0.35);
             backdrop-filter: blur(8px);
         }
 
@@ -523,15 +417,6 @@
             color: #f8fbff;
         }
 
-        #chatMessages::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        #chatMessages::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.18);
-            border-radius: 999px;
-        }
-
         #chatInput {
             border: none;
             outline: none;
@@ -540,7 +425,6 @@
             border-top: 1px solid rgba(255,255,255,0.06);
             color: white;
             font-size: 14px;
-            font-family: var(--font-main);
         }
 
         #minimapBox {
@@ -553,8 +437,6 @@
             border: 1px solid var(--border);
             border-radius: 22px;
             overflow: hidden;
-            box-shadow: 0 12px 28px rgba(0,0,0,0.38);
-            backdrop-filter: blur(8px);
             pointer-events: auto;
         }
 
@@ -597,7 +479,6 @@
             border-radius: 20px;
             background: rgba(16,20,26,0.86);
             border: 1px solid var(--border);
-            box-shadow: 0 14px 36px rgba(0,0,0,0.45);
             backdrop-filter: blur(10px);
             overflow-x: auto;
             max-width: 92vw;
@@ -624,14 +505,7 @@
             justify-content: flex-end;
             position: relative;
             cursor: pointer;
-            transition: 0.16s ease;
             overflow: hidden;
-        }
-
-        .action-slot:hover {
-            transform: translateY(-7px);
-            border-color: rgba(241,196,15,0.45);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.30);
         }
 
         .action-slot.disabled {
@@ -650,7 +524,6 @@
             display: grid;
             place-items: center;
             background: #db4c3f;
-            border: 1px solid rgba(255,255,255,0.12);
             color: white;
             font-size: 12px;
             font-weight: 700;
@@ -660,7 +533,6 @@
             position: absolute;
             top: 18px;
             font-size: 28px;
-            filter: drop-shadow(0 6px 8px rgba(0,0,0,0.35));
         }
 
         .cost {
@@ -669,7 +541,6 @@
             text-align: center;
             font-weight: 700;
             font-size: 13px;
-            letter-spacing: 0.5px;
             color: #ffd85a;
             background: rgba(0,0,0,0.42);
             border-top: 1px solid rgba(255,255,255,0.06);
@@ -683,28 +554,12 @@
             padding: 14px 22px;
             border-radius: 14px;
             background: rgba(231,76,60,0.92);
-            border: 1px solid rgba(255,255,255,0.12);
             color: white;
             font-weight: 700;
             font-size: 18px;
-            box-shadow: 0 16px 30px rgba(0,0,0,0.30);
             opacity: 0;
             transition: opacity 0.25s ease;
             z-index: 999;
-        }
-
-        #crosshairInfo {
-            position: absolute;
-            left: 18px;
-            top: 18px;
-            padding: 10px 14px;
-            border-radius: 14px;
-            background: rgba(14,18,24,0.82);
-            border: 1px solid var(--border);
-            font-size: 13px;
-            color: #d3ddeb;
-            pointer-events: none;
-            box-shadow: 0 10px 22px rgba(0,0,0,0.28);
         }
 
         #killFeed {
@@ -720,20 +575,18 @@
 
         .kill-item {
             background: rgba(15,19,25,0.84);
-            border: 1px solid rgba(255,255,255,0.08);
             border-left: 4px solid #e74c3c;
             padding: 10px 12px;
             border-radius: 12px;
             font-size: 13px;
             color: #edf4fb;
             animation: killFade 3.8s linear forwards;
-            backdrop-filter: blur(8px);
         }
 
         @keyframes killFade {
-            0%   { opacity: 0; transform: translateY(-6px); }
-            8%   { opacity: 1; transform: translateY(0); }
-            85%  { opacity: 1; transform: translateY(0); }
+            0% { opacity: 0; transform: translateY(-6px); }
+            8% { opacity: 1; transform: translateY(0); }
+            85% { opacity: 1; transform: translateY(0); }
             100% { opacity: 0; transform: translateY(-4px); }
         }
 
@@ -744,9 +597,7 @@
             display: none;
             align-items: center;
             justify-content: center;
-            background:
-                radial-gradient(circle at center, rgba(231,76,60,0.18), transparent 35%),
-                rgba(0,0,0,0.84);
+            background: rgba(0,0,0,0.84);
         }
 
         .death-card {
@@ -755,7 +606,6 @@
             border-radius: 28px;
             background: linear-gradient(180deg, rgba(28,34,43,0.95), rgba(12,16,20,0.94));
             border: 1px solid rgba(255,255,255,0.08);
-            box-shadow: 0 28px 60px rgba(0,0,0,0.45);
             text-align: center;
         }
 
@@ -764,7 +614,6 @@
             font-size: 64px;
             margin: 0 0 8px 0;
             color: #ff6b6b;
-            letter-spacing: 2px;
         }
 
         .death-subtitle {
@@ -775,21 +624,13 @@
 
         .death-text {
             color: var(--muted);
-            line-height: 1.7;
             margin-bottom: 24px;
-            font-size: 15px;
         }
 
         @media (max-width: 980px) {
             .lobby-wrap { grid-template-columns: 1fr; }
-            .hero-box { min-height: auto; }
-            .panel { min-height: auto; }
-            #lordzboard { width: 220px; }
-            #bottomRightBox { width: 320px; }
-            #topBar {
-                min-width: unset;
-                width: calc(100vw - 36px);
-            }
+            .hero-box, .panel { min-height: auto; }
+            #topBar { min-width: unset; width: calc(100vw - 36px); }
         }
     </style>
 </head>
@@ -808,14 +649,13 @@
                 <div class="subtitle">EFSANEVİ İRONİ SAVAŞLARI</div>
                 <div class="hero-desc">
                     Altın topla, maden kur, ordunu büyüt, kulelerle savunma hattı oluştur ve haritanın en büyük lordu ol.
-                    Bu sürüm saldırı animasyonları, kule efektleri, patlama hissi ve yeniden başlama ekranı ile geliştirildi.
                 </div>
 
                 <div class="hero-features">
-                    <div class="feature-chip">✨ Gelişmiş parçacık efektleri</div>
-                    <div class="feature-chip">🎯 Gerçek ok ve mor büyü animasyonları</div>
-                    <div class="feature-chip">💥 Patlama ve vuruş etkisi</div>
-                    <div class="feature-chip">☠️ Ölünce yeniden başla ekranı</div>
+                    <div class="feature-chip">✨ Canlı savaş alanı</div>
+                    <div class="feature-chip">🎯 Ok ve büyü saldırıları</div>
+                    <div class="feature-chip">💥 Çarpışma efektleri</div>
+                    <div class="feature-chip">☠️ Ölünce yeniden başla</div>
                 </div>
             </div>
 
@@ -842,10 +682,10 @@
 
                     <div class="char-box" onclick="selectChar('togg', this)">
                         <div class="char-preview">
-                            <img id="preview-togg" src="togg.png" alt="Togg T10F">
+                            <img id="preview-togg" src="togg.png" alt="Togg">
                             <span class="emoji" id="emoji-togg">🚗</span>
                         </div>
-                        <div class="char-name">Togg T10F</div>
+                        <div class="char-name">Togg</div>
                         <div class="char-desc">Hızlı ve modern</div>
                     </div>
 
@@ -873,7 +713,6 @@
     <div id="uiLayer">
         <div id="systemAlert">Geçersiz İşlem</div>
         <div id="killFeed"></div>
-        <div id="crosshairInfo">Farenin yönüne hareket ediyorsun</div>
 
         <div id="topBar">
             <div class="topStat">
@@ -914,13 +753,13 @@
             <div class="action-category-label">Kurulum ve Birim Üretimi</div>
 
             <div id="actionBar">
-                <div class="action-slot" id="btn_house" onclick="buyItem('house')" title="Ev (Nüfus sınırını artırır)">
+                <div class="action-slot" id="btn_house" onclick="buyItem('house')" title="Ev">
                     <span class="hotkey">C</span>
                     <span class="icon">⛺</span>
                     <div class="cost">250</div>
                 </div>
 
-                <div class="action-slot" id="btn_tower" onclick="buyItem('tower')" title="Okçu Kulesi">
+                <div class="action-slot" id="btn_tower" onclick="buyItem('tower')" title="Kule">
                     <span class="hotkey">E</span>
                     <span class="icon">🗼</span>
                     <div class="cost">250</div>
@@ -984,9 +823,7 @@
         <div class="death-card">
             <h2 class="death-title">KATLEDİLDİN!</h2>
             <div class="death-subtitle">Krallığın düştü, ama savaş bitmedi.</div>
-            <div class="death-text">
-                Tekrar giriş yaparak yeni bir lord olarak savaşa dönebilirsin.
-            </div>
+            <div class="death-text">Yeni bir lord olarak savaşa dönebilirsin.</div>
             <button id="restartBtn">YENİDEN BAŞLA</button>
         </div>
     </div>
@@ -995,8 +832,8 @@
     <script src="client.js"></script>
 
     <script>
-        window.showSystemAlert = function (msg, duration = 2200) {
-            const alertBox = document.getElementById('systemAlert');
+        window.showSystemAlert = function(msg, duration = 2200) {
+            const alertBox = document.getElementById("systemAlert");
             alertBox.textContent = msg;
             alertBox.style.opacity = 1;
             clearTimeout(window.__alertTimer);
@@ -1005,33 +842,33 @@
             }, duration);
         };
 
-        window.pushKillFeed = function (msg) {
-            const wrap = document.getElementById('killFeed');
-            const item = document.createElement('div');
-            item.className = 'kill-item';
+        window.pushKillFeed = function(msg) {
+            const wrap = document.getElementById("killFeed");
+            const item = document.createElement("div");
+            item.className = "kill-item";
             item.textContent = msg;
             wrap.appendChild(item);
             setTimeout(() => item.remove(), 3900);
         };
 
         function setupCharacterPreview(id) {
-            const img = document.getElementById('preview-' + id);
-            const emoji = document.getElementById('emoji-' + id);
+            const img = document.getElementById("preview-" + id);
+            const emoji = document.getElementById("emoji-" + id);
 
             img.onload = () => {
-                img.style.display = 'block';
-                emoji.style.display = 'none';
+                img.style.display = "block";
+                emoji.style.display = "none";
             };
 
             img.onerror = () => {
-                img.style.display = 'none';
-                emoji.style.display = 'inline-block';
+                img.style.display = "none";
+                emoji.style.display = "inline-block";
             };
         }
 
-        ['recep', 'togg', 'bez'].forEach(setupCharacterPreview);
+        ["recep", "togg", "bez"].forEach(setupCharacterPreview);
 
-        document.getElementById('restartBtn').addEventListener('click', () => {
+        document.getElementById("restartBtn").addEventListener("click", () => {
             window.location.reload();
         });
     </script>
