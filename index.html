@@ -1,909 +1,950 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>6D.IO - Efsanevi İroni Savaşları</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
-
-    <style>
-        :root {
-            --primary: #f1c40f;
-            --danger: #e74c3c;
-            --success: #2ecc71;
-            --panel: rgba(20, 26, 34, 0.86);
-            --border: rgba(255,255,255,0.10);
-            --text: #eef3f9;
-            --muted: #9eb0c2;
-            --font-main: 'Ubuntu', sans-serif;
-            --font-title: 'Oswald', sans-serif;
-        }
-
-        * { box-sizing: border-box; }
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background: #0c1118;
-            color: var(--text);
-            font-family: var(--font-main);
-            user-select: none;
-        }
-
-        #gameCanvas {
-            display: none;
-            position: absolute;
-            inset: 0;
-            z-index: 1;
-        }
-
-        #lobby {
-            position: absolute;
-            inset: 0;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background:
-                radial-gradient(circle at 50% 20%, rgba(241,196,15,0.12), transparent 28%),
-                linear-gradient(180deg, #101821 0%, #06080c 100%);
-        }
-
-        .lobby-wrap {
-            width: min(980px, 94vw);
-            display: grid;
-            grid-template-columns: 1.05fr 0.95fr;
-            gap: 24px;
-        }
-
-        .hero-box, .panel {
-            border-radius: 24px;
-            border: 1px solid var(--border);
-            background: linear-gradient(180deg, rgba(34,42,54,0.86), rgba(15,20,26,0.88));
-            box-shadow: 0 20px 60px rgba(0,0,0,0.45);
-            backdrop-filter: blur(12px);
-        }
-
-        .hero-box {
-            padding: 32px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            min-height: 540px;
-        }
-
-        .hero-badge {
-            display: inline-block;
-            width: fit-content;
-            padding: 8px 14px;
-            border-radius: 999px;
-            background: rgba(241,196,15,0.12);
-            border: 1px solid rgba(241,196,15,0.26);
-            color: #ffd95d;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 18px;
-        }
-
-        .title {
-            margin: 0;
-            font-family: var(--font-title);
-            font-size: clamp(72px, 10vw, 116px);
-            line-height: 0.88;
-            color: var(--primary);
-            text-shadow: 0 0 28px rgba(241,196,15,0.30), 0 10px 24px rgba(0,0,0,0.35);
-        }
-
-        .subtitle {
-            margin-top: 14px;
-            font-size: 22px;
-            color: #cfdae8;
-            letter-spacing: 2px;
-        }
-
-        .hero-desc {
-            margin-top: 24px;
-            color: var(--muted);
-            font-size: 17px;
-            line-height: 1.7;
-        }
-
-        .hero-features {
-            margin-top: 24px;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
-
-        .feature-chip {
-            padding: 13px 14px;
-            border-radius: 14px;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: rgba(255,255,255,0.04);
-            color: #dfe8f5;
-            font-size: 14px;
-        }
-
-        .panel {
-            padding: 28px;
-            min-height: 540px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .panel-title {
-            margin: 0 0 8px 0;
-            font-family: var(--font-title);
-            font-size: 34px;
-        }
-
-        .panel-subtitle {
-            margin-bottom: 20px;
-            color: var(--muted);
-        }
-
-        .input-group {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 18px;
-        }
-
-        .input-field {
-            width: 100%;
-            padding: 15px 16px;
-            border-radius: 14px;
-            border: 1px solid rgba(255,255,255,0.10);
-            background: rgba(0,0,0,0.30);
-            color: white;
-            outline: none;
-            font-family: var(--font-main);
-            font-size: 18px;
-            font-weight: 700;
-        }
-
-        #clanName {
-            width: 120px;
-            text-transform: uppercase;
-            text-align: center;
-        }
-
-        .section-label {
-            margin: 8px 0 12px 0;
-            color: var(--muted);
-            font-size: 13px;
-            letter-spacing: 1.8px;
-            text-transform: uppercase;
-            font-weight: 700;
-        }
-
-        .char-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 14px;
-            margin-bottom: 20px;
-        }
-
-        .char-box {
-            min-height: 160px;
-            border-radius: 18px;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: linear-gradient(180deg, rgba(53,62,76,0.75), rgba(25,29,36,0.78));
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: transform 0.18s ease, border-color 0.18s ease;
-            position: relative;
-        }
-
-        .char-box:hover {
-            transform: translateY(-5px);
-            border-color: rgba(241,196,15,0.45);
-        }
-
-        .char-box.active {
-            border-color: rgba(241,196,15,0.75);
-            box-shadow: 0 0 0 2px rgba(241,196,15,0.12);
-        }
-
-        .char-box.active::after {
-            content: "SEÇİLDİ";
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 11px;
-            font-weight: 700;
-            padding: 4px 8px;
-            border-radius: 999px;
-            background: var(--primary);
-            color: #111;
-        }
-
-        .char-preview {
-            width: 84px;
-            height: 84px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255,255,255,0.05);
-            overflow: hidden;
-        }
-
-        .char-preview img {
-            width: 84px;
-            height: 84px;
-            object-fit: contain;
-            display: none;
-        }
-
-        .char-preview .emoji {
-            font-size: 52px;
-        }
-
-        .char-name {
-            font-size: 18px;
-            font-weight: 700;
-        }
-
-        .char-desc {
-            font-size: 12px;
-            color: var(--muted);
-        }
-
-        #playBtn, #restartBtn, .mini-btn {
-            border: none;
-            border-radius: 14px;
-            cursor: pointer;
-            font-family: var(--font-title);
-            letter-spacing: 1px;
-        }
-
-        #playBtn, #restartBtn {
-            width: 100%;
-            padding: 18px 20px;
-            background: linear-gradient(180deg, #38e47b 0%, #24b561 100%);
-            color: white;
-            font-size: 28px;
-            box-shadow: 0 8px 0 #168047, 0 18px 28px rgba(0,0,0,0.35);
-        }
-
-        .tip-box {
-            margin-top: 18px;
-            padding: 14px 16px;
-            border-radius: 14px;
-            background: rgba(255,255,255,0.045);
-            border: 1px solid rgba(255,255,255,0.08);
-            color: #cfd9e6;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        #uiLayer {
-            display: none;
-            position: absolute;
-            inset: 0;
-            z-index: 10;
-            pointer-events: none;
-        }
-
-        .glass {
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 18px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 12px 28px rgba(0,0,0,0.34);
-        }
-
-        #topBar {
-            position: absolute;
-            top: 16px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: min(780px, calc(100vw - 36px));
-            display: flex;
-            justify-content: space-between;
-            gap: 16px;
-            padding: 12px 18px;
-            pointer-events: auto;
-        }
-
-        .topStat {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 700;
-            font-size: 22px;
-        }
-
-        .topStat small {
-            display: block;
-            font-size: 11px;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        #goldVal { color: #ffd85a; }
-        #scoreVal { color: #8bd8ff; }
-
-        #lordzboard {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            width: 280px;
-            padding: 16px;
-            pointer-events: auto;
-        }
-
-        #lordzboard h3, #clanPanel h3 {
-            margin: 0 0 12px 0;
-            font-size: 22px;
-            color: var(--primary);
-            font-family: var(--font-title);
-            text-align: center;
-        }
-
-        #leaderList {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            max-height: 280px;
-            overflow: auto;
-        }
-
-        #leaderList li {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            padding: 7px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-            font-size: 14px;
-            font-weight: 700;
-        }
-
-        #bottomRightBox {
-            position: absolute;
-            right: 16px;
-            bottom: 16px;
-            width: 360px;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            pointer-events: auto;
-        }
-
-        #chatBox {
-            height: 220px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        #chatMessages {
-            flex: 1;
-            padding: 12px;
-            overflow-y: auto;
-            font-size: 14px;
-            line-height: 1.45;
-            color: #f8fbff;
-        }
-
-        #chatInput {
-            border: none;
-            outline: none;
-            padding: 14px 16px;
-            background: rgba(255,255,255,0.03);
-            border-top: 1px solid rgba(255,255,255,0.06);
-            color: white;
-            font-size: 14px;
-            font-family: var(--font-main);
-        }
-
-        #minimapBox {
-            position: absolute;
-            left: 16px;
-            bottom: 16px;
-            width: 250px;
-            height: 250px;
-            overflow: hidden;
-            pointer-events: auto;
-        }
-
-        #minimapCanvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-
-        #actionBarWrapper {
-            position: absolute;
-            left: 50%;
-            bottom: 16px;
-            transform: translateX(-50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            pointer-events: auto;
-            max-width: calc(100vw - 40px);
-        }
-
-        .action-category-label {
-            margin-bottom: 8px;
-            padding: 6px 14px;
-            border-radius: 999px;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            background: rgba(0,0,0,0.40);
-            border: 1px solid rgba(255,255,255,0.08);
-            color: var(--muted);
-        }
-
-        #actionBar {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px;
-            border-radius: 20px;
-            background: rgba(16,20,26,0.86);
-            border: 1px solid var(--border);
-            box-shadow: 0 14px 36px rgba(0,0,0,0.45);
-            backdrop-filter: blur(10px);
-            overflow-x: auto;
-            max-width: calc(100vw - 40px);
-        }
-
-        .action-divider {
-            width: 2px;
-            height: 58px;
-            background: rgba(255,255,255,0.10);
-            border-radius: 99px;
-            margin: 0 4px;
-        }
-
-        .action-slot {
-            flex: 0 0 auto;
-            width: 68px;
-            height: 90px;
-            border-radius: 14px;
-            background: linear-gradient(180deg, rgba(67,77,94,0.88), rgba(25,29,36,0.95));
-            border: 1px solid rgba(255,255,255,0.08);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-end;
-            position: relative;
-            cursor: pointer;
-            overflow: hidden;
-        }
-
-        .action-slot:hover {
-            transform: translateY(-5px);
-        }
-
-        .action-slot.selected {
-            border-color: rgba(241,196,15,0.65);
-            box-shadow: 0 0 0 2px rgba(241,196,15,0.12);
-        }
-
-        .action-slot.disabled {
-            opacity: 0.30;
-            filter: grayscale(1);
-            pointer-events: none;
-        }
-
-        .hotkey {
-            position: absolute;
-            top: 6px;
-            left: 6px;
-            min-width: 22px;
-            height: 22px;
-            border-radius: 7px;
-            display: grid;
-            place-items: center;
-            background: #db4c3f;
-            color: white;
-            font-size: 12px;
-            font-weight: 700;
-        }
-
-        .icon {
-            position: absolute;
-            top: 18px;
-            font-size: 28px;
-        }
-
-        .cost {
-            width: 100%;
-            padding: 6px 0;
-            text-align: center;
-            font-weight: 700;
-            font-size: 13px;
-            color: #ffd85a;
-            background: rgba(0,0,0,0.42);
-            border-top: 1px solid rgba(255,255,255,0.06);
-        }
-
-        #systemAlert {
-            position: absolute;
-            top: 90px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 14px 22px;
-            border-radius: 14px;
-            background: rgba(231,76,60,0.92);
-            color: white;
-            font-weight: 700;
-            font-size: 18px;
-            opacity: 0;
-            transition: opacity 0.25s ease;
-            z-index: 999;
-        }
-
-        #killFeed {
-            position: absolute;
-            top: 60px;
-            left: 16px;
-            width: 320px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            pointer-events: none;
-        }
-
-        .kill-item {
-            background: rgba(15,19,25,0.84);
-            border-left: 4px solid #e74c3c;
-            padding: 10px 12px;
-            border-radius: 12px;
-            font-size: 13px;
-            color: #edf4fb;
-            animation: killFade 3.8s linear forwards;
-        }
-
-        @keyframes killFade {
-            0%   { opacity: 0; transform: translateY(-6px); }
-            8%   { opacity: 1; transform: translateY(0); }
-            85%  { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-4px); }
-        }
-
-        #clanPanel {
-            position: absolute;
-            left: 16px;
-            top: 16px;
-            width: 280px;
-            padding: 16px;
-            pointer-events: auto;
-        }
-
-        .panel-row {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-
-        .small-input {
-            flex: 1;
-            padding: 10px 12px;
-            border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.10);
-            background: rgba(0,0,0,0.28);
-            color: white;
-            outline: none;
-            text-transform: uppercase;
-            font-weight: 700;
-        }
-
-        .mini-btn {
-            padding: 10px 12px;
-            font-size: 14px;
-            color: white;
-            background: linear-gradient(180deg, #3baaf0 0%, #1d78ba 100%);
-        }
-
-        .mini-btn.leave {
-            background: linear-gradient(180deg, #ff7b7b 0%, #d14b4b 100%);
-        }
-
-        .info-line {
-            font-size: 13px;
-            color: var(--muted);
-            margin-bottom: 10px;
-        }
-
-        #clanMembers {
-            max-height: 140px;
-            overflow-y: auto;
-            border-top: 1px solid rgba(255,255,255,0.06);
-            padding-top: 8px;
-        }
-
-        .member-row {
-            padding: 6px 0;
-            font-size: 14px;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
-        }
-
-        .muted { color: var(--muted); }
-
-        #deathOverlay {
-            position: absolute;
-            inset: 0;
-            z-index: 1200;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0,0,0,0.84);
-        }
-
-        .death-card {
-            width: min(520px, 92vw);
-            padding: 34px 30px;
-            border-radius: 28px;
-            background: linear-gradient(180deg, rgba(28,34,43,0.95), rgba(12,16,20,0.94));
-            border: 1px solid rgba(255,255,255,0.08);
-            box-shadow: 0 28px 60px rgba(0,0,0,0.45);
-            text-align: center;
-        }
-
-        .death-title {
-            font-family: var(--font-title);
-            font-size: 64px;
-            margin: 0 0 8px 0;
-            color: #ff6b6b;
-        }
-
-        .death-subtitle {
-            font-size: 18px;
-            color: #d9e2ef;
-            margin-bottom: 24px;
-        }
-
-        @media (max-width: 980px) {
-            .lobby-wrap { grid-template-columns: 1fr; }
-            .hero-box, .panel { min-height: auto; }
-            #clanPanel, #lordzboard { width: 240px; }
-            #bottomRightBox { width: 320px; }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>6D.IO - Efsanevi İroni Savaşları</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #f1c40f;
+      --danger: #e74c3c;
+      --success: #2ecc71;
+      --cyan: #61dafb;
+      --purple: #b07cff;
+      --panel: rgba(18, 24, 32, 0.86);
+      --panel2: rgba(28, 35, 46, 0.9);
+      --border: rgba(255,255,255,0.10);
+      --text: #eef3f9;
+      --muted: #99a9bc;
+      --font-main: 'Ubuntu', sans-serif;
+      --font-title: 'Oswald', sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #0d1118;
+      color: var(--text);
+      font-family: var(--font-main);
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    canvas { display: block; }
+
+    #gameCanvas {
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+
+    #lobby {
+      position: absolute;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(circle at 50% 15%, rgba(241,196,15,0.12), transparent 30%),
+        radial-gradient(circle at 20% 80%, rgba(97,218,251,0.08), transparent 28%),
+        linear-gradient(180deg, #111822 0%, #05070b 100%);
+    }
+
+    .lobby-wrap {
+      width: min(1020px, 95vw);
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 24px;
+    }
+
+    .hero-box, .panel {
+      border-radius: 26px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(31,39,52,0.88), rgba(13,18,25,0.92));
+      box-shadow: 0 24px 70px rgba(0,0,0,0.42);
+      backdrop-filter: blur(14px);
+    }
+
+    .hero-box {
+      padding: 34px;
+      min-height: 570px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      width: fit-content;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(241,196,15,0.12);
+      border: 1px solid rgba(241,196,15,0.26);
+      color: #ffd95d;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    .title {
+      margin: 0;
+      font-family: var(--font-title);
+      font-size: clamp(72px, 10vw, 116px);
+      line-height: 0.88;
+      color: var(--primary);
+      text-shadow:
+        0 0 26px rgba(241,196,15,0.28),
+        0 10px 28px rgba(0,0,0,0.42);
+    }
+
+    .subtitle {
+      margin-top: 14px;
+      font-size: 22px;
+      color: #cfdae8;
+      letter-spacing: 2px;
+    }
+
+    .hero-desc {
+      margin-top: 24px;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.7;
+    }
+
+    .hero-features {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .feature-chip {
+      padding: 13px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      color: #dfe8f5;
+      font-size: 14px;
+    }
+
+    .panel {
+      padding: 28px;
+      min-height: 570px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .panel-title {
+      margin: 0 0 8px 0;
+      font-family: var(--font-title);
+      font-size: 34px;
+    }
+
+    .panel-subtitle {
+      margin-bottom: 18px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 15px 16px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.30);
+      color: white;
+      outline: none;
+      font-family: var(--font-main);
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    #clanName {
+      width: 120px;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    .section-label {
+      margin: 8px 0 12px 0;
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .char-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .char-box {
+      min-height: 164px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: linear-gradient(180deg, rgba(53,62,76,0.75), rgba(25,29,36,0.78));
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      position: relative;
+      transition: transform 0.18s ease, border-color 0.18s ease;
+    }
+
+    .char-box:hover {
+      transform: translateY(-5px);
+      border-color: rgba(241,196,15,0.45);
+    }
+
+    .char-box.active {
+      border-color: rgba(241,196,15,0.75);
+      box-shadow: 0 0 0 2px rgba(241,196,15,0.12);
+    }
+
+    .char-box.active::after {
+      content: "SEÇİLDİ";
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: var(--primary);
+      color: #111;
+    }
+
+    .char-preview {
+      width: 78px;
+      height: 78px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.05);
+      overflow: hidden;
+    }
+
+    .char-preview img {
+      width: 78px;
+      height: 78px;
+      object-fit: contain;
+      display: none;
+    }
+
+    .char-preview .emoji {
+      font-size: 48px;
+    }
+
+    .char-name {
+      font-size: 17px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .char-desc {
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+      padding: 0 4px;
+    }
+
+    #playBtn, #restartBtn, .mini-btn {
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      font-family: var(--font-title);
+      letter-spacing: 1px;
+    }
+
+    #playBtn, #restartBtn {
+      width: 100%;
+      padding: 18px 20px;
+      background: linear-gradient(180deg, #38e47b 0%, #24b561 100%);
+      color: white;
+      font-size: 28px;
+      box-shadow: 0 8px 0 #168047, 0 18px 28px rgba(0,0,0,0.35);
+    }
+
+    .tip-box {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.045);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #cfd9e6;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    #uiLayer {
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .glass {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.34);
+    }
+
+    #topBar {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(800px, calc(100vw - 32px));
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 18px;
+      pointer-events: auto;
+    }
+
+    .topStat {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 22px;
+    }
+
+    .topStat small {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    #goldVal { color: #ffd85a; }
+    #scoreVal { color: #8bd8ff; }
+
+    #lordzboard {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 270px;
+      padding: 14px;
+      pointer-events: auto;
+    }
+
+    #lordzboard h3, #clanPanel h3 {
+      margin: 0 0 10px 0;
+      font-size: 19px;
+      color: var(--primary);
+      font-family: var(--font-title);
+      text-align: center;
+      letter-spacing: 1px;
+    }
+
+    #leaderList {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      max-height: 250px;
+      overflow: auto;
+    }
+
+    #leaderList li {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    #bottomRightBox {
+      position: absolute;
+      right: 14px;
+      bottom: 14px;
+      width: 340px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      pointer-events: auto;
+    }
+
+    #chatBox {
+      height: 210px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #chatMessages {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+      font-size: 14px;
+      line-height: 1.45;
+      color: #f8fbff;
+    }
+
+    #chatInput {
+      border: none;
+      outline: none;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.03);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      color: white;
+      font-size: 14px;
+      font-family: var(--font-main);
+    }
+
+    #minimapBox {
+      position: absolute;
+      left: 14px;
+      bottom: 14px;
+      width: 230px;
+      height: 230px;
+      overflow: hidden;
+      pointer-events: auto;
+    }
+
+    #minimapCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    #actionBarWrapper {
+      position: absolute;
+      left: 50%;
+      bottom: 14px;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      pointer-events: auto;
+      max-width: calc(100vw - 34px);
+    }
+
+    .action-category-label {
+      margin-bottom: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      background: rgba(0,0,0,0.40);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--muted);
+    }
+
+    #actionBar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 20px;
+      background: rgba(16,20,26,0.88);
+      border: 1px solid var(--border);
+      box-shadow: 0 14px 36px rgba(0,0,0,0.45);
+      backdrop-filter: blur(10px);
+      overflow-x: auto;
+      max-width: calc(100vw - 34px);
+    }
+
+    .action-divider {
+      width: 2px;
+      height: 58px;
+      background: rgba(255,255,255,0.10);
+      border-radius: 99px;
+      margin: 0 4px;
+    }
+
+    .action-slot {
+      flex: 0 0 auto;
+      width: 68px;
+      height: 90px;
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(67,77,94,0.90), rgba(22,26,33,0.96));
+      border: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      position: relative;
+      cursor: pointer;
+      overflow: hidden;
+      transition: transform 0.14s ease, border-color 0.14s ease;
+    }
+
+    .action-slot:hover {
+      transform: translateY(-4px);
+      border-color: rgba(241,196,15,0.45);
+    }
+
+    .action-slot.selected {
+      border-color: rgba(241,196,15,0.68);
+      box-shadow: 0 0 0 2px rgba(241,196,15,0.12);
+    }
+
+    .action-slot.disabled {
+      opacity: 0.30;
+      filter: grayscale(1);
+      pointer-events: none;
+    }
+
+    .hotkey {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      min-width: 22px;
+      height: 22px;
+      border-radius: 7px;
+      display: grid;
+      place-items: center;
+      background: #db4c3f;
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .icon {
+      position: absolute;
+      top: 18px;
+      font-size: 28px;
+    }
+
+    .cost {
+      width: 100%;
+      padding: 6px 0;
+      text-align: center;
+      font-weight: 700;
+      font-size: 13px;
+      color: #ffd85a;
+      background: rgba(0,0,0,0.42);
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    #systemAlert {
+      position: absolute;
+      top: 86px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 14px 22px;
+      border-radius: 14px;
+      background: rgba(231,76,60,0.92);
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      z-index: 999;
+    }
+
+    #killFeed {
+      position: absolute;
+      top: 58px;
+      left: 14px;
+      width: 290px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .kill-item {
+      background: rgba(15,19,25,0.84);
+      border-left: 4px solid #e74c3c;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      color: #edf4fb;
+      animation: killFade 3.8s linear forwards;
+    }
+
+    @keyframes killFade {
+      0%   { opacity: 0; transform: translateY(-6px); }
+      8%   { opacity: 1; transform: translateY(0); }
+      85%  { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-4px); }
+    }
+
+    /* Küçük klan paneli */
+    #clanPanel {
+      position: absolute;
+      left: 14px;
+      top: 14px;
+      width: 210px;
+      padding: 10px 10px 12px 10px;
+      pointer-events: auto;
+    }
+
+    #clanPanel h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .panel-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .small-input {
+      flex: 1;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.28);
+      color: white;
+      outline: none;
+      text-transform: uppercase;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .mini-btn {
+      padding: 8px 10px;
+      font-size: 12px;
+      color: white;
+      background: linear-gradient(180deg, #3baaf0 0%, #1d78ba 100%);
+      white-space: nowrap;
+    }
+
+    .mini-btn.leave {
+      background: linear-gradient(180deg, #ff7b7b 0%, #d14b4b 100%);
+      width: 100%;
+    }
+
+    .info-line {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    #clanMembers {
+      max-height: 80px;
+      overflow-y: auto;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding-top: 6px;
+      font-size: 12px;
+    }
+
+    .member-row {
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .muted { color: var(--muted); }
+
+    #deathOverlay {
+      position: absolute;
+      inset: 0;
+      z-index: 1200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.84);
+    }
+
+    .death-card {
+      width: min(520px, 92vw);
+      padding: 34px 30px;
+      border-radius: 28px;
+      background: linear-gradient(180deg, rgba(28,34,43,0.95), rgba(12,16,20,0.94));
+      border: 1px solid rgba(255,255,255,0.08);
+      text-align: center;
+      box-shadow: 0 28px 60px rgba(0,0,0,0.45);
+    }
+
+    .death-title {
+      font-family: var(--font-title);
+      font-size: 64px;
+      margin: 0 0 8px 0;
+      color: #ff6b6b;
+    }
+
+    .death-subtitle {
+      font-size: 18px;
+      color: #d9e2ef;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 980px) {
+      .lobby-wrap { grid-template-columns: 1fr; }
+      .hero-box, .panel { min-height: auto; }
+      .char-container { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
 </head>
 <body>
-    <div id="lobby">
-        <div class="lobby-wrap">
-            <div class="hero-box">
-                <div class="hero-badge">⚔️ 6D.IO BETA ARENA</div>
-                <h1 class="title">6D.IO</h1>
-                <div class="subtitle">EFSANEVİ İRONİ SAVAŞLARI</div>
-                <div class="hero-desc">
-                    Daha akıcı sunucu, klan sistemi, yapı satma, azaltılmış maden geliri ve daha dengeli harita yerleşimi ile geliştirilmiş sürüm.
-                </div>
-                <div class="hero-features">
-                    <div class="feature-chip">⚡ Daha akıcı ağ gönderimi</div>
-                    <div class="feature-chip">🏰 Yapı satma ve altın iadesi</div>
-                    <div class="feature-chip">👥 Oyun içi klan sistemi</div>
-                    <div class="feature-chip">🪙 Azaltılmış altın damarı ve maden geliri</div>
-                </div>
-            </div>
-
-            <div class="panel">
-                <h2 class="panel-title">SAVAŞA HAZIRLAN</h2>
-                <div class="panel-subtitle">İsim yaz, istersen girişte klan etiketi ekle, şampiyonunu seç.</div>
-
-                <div class="input-group">
-                    <input type="text" id="clanName" class="input-field" placeholder="[KLAN]" maxlength="6" autocomplete="off">
-                    <input type="text" id="playerName" class="input-field" placeholder="Yüce Lordun Adı..." maxlength="15" autocomplete="off" autofocus>
-                </div>
-
-                <div class="section-label">Şampiyonunu Seç</div>
-
-                <div class="char-container">
-                    <div class="char-box active" onclick="selectChar('recep', this)">
-                        <div class="char-preview">
-                            <img id="preview-recep" src="recep.png" alt="Recep">
-                            <span class="emoji" id="emoji-recep">🧔</span>
-                        </div>
-                        <div class="char-name">Recep</div>
-                        <div class="char-desc">Dengeli lider</div>
-                    </div>
-
-                    <div class="char-box" onclick="selectChar('togg', this)">
-                        <div class="char-preview">
-                            <img id="preview-togg" src="togg.png" alt="Togg">
-                            <span class="emoji" id="emoji-togg">🚗</span>
-                        </div>
-                        <div class="char-name">Togg T10F</div>
-                        <div class="char-desc">Hızlı ve modern</div>
-                    </div>
-
-                    <div class="char-box" onclick="selectChar('bez', this)">
-                        <div class="char-preview">
-                            <img id="preview-bez" src="bez.png" alt="Sarı Bez">
-                            <span class="emoji" id="emoji-bez">🧽</span>
-                        </div>
-                        <div class="char-name">Sarı Bez</div>
-                        <div class="char-desc">Saf ironi gücü</div>
-                    </div>
-                </div>
-
-                <button id="playBtn">SAVAŞA KATIL</button>
-
-                <div class="tip-box">
-                    <strong>İpucu:</strong> Bina yerleştirmek için önce yapı butonuna bas, sonra haritada yer seç.
-                    Satmak için kırmızı satış modunu açıp kendi yapına tıkla.
-                </div>
-            </div>
+  <div id="lobby">
+    <div class="lobby-wrap">
+      <div class="hero-box">
+        <div class="hero-badge">⚔️ 6D.IO ULTIMATE ARENA</div>
+        <h1 class="title">6D.IO</h1>
+        <div class="subtitle">EFSANEVİ İRONİ SAVAŞLARI</div>
+        <div class="hero-desc">
+          Daha akıcı sunucu, daha premium harita, kompakt klan sistemi, Pikachu desteği, daha iyi yerleşim ve Lordz.io hissine daha yakın savaş yapısı.
         </div>
+        <div class="hero-features">
+          <div class="feature-chip">⚡ Optimize edilmiş performans</div>
+          <div class="feature-chip">🗺️ Daha güzel harita zemini</div>
+          <div class="feature-chip">👥 Küçük klan menüsü</div>
+          <div class="feature-chip">⚔️ Daha temiz savaş hissi</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2 class="panel-title">SAVAŞA HAZIRLAN</h2>
+        <div class="panel-subtitle">İsim yaz, istersen girişte klan etiketi ekle, şampiyonunu seç.</div>
+
+        <div class="input-group">
+          <input type="text" id="clanName" class="input-field" placeholder="[KLAN]" maxlength="6" autocomplete="off">
+          <input type="text" id="playerName" class="input-field" placeholder="Yüce Lordun Adı..." maxlength="15" autocomplete="off" autofocus>
+        </div>
+
+        <div class="section-label">Şampiyonunu Seç</div>
+
+        <div class="char-container">
+          <div class="char-box active" onclick="selectChar('recep', this)">
+            <div class="char-preview">
+              <img id="preview-recep" src="recep.png" alt="Recep">
+              <span class="emoji" id="emoji-recep">🧔</span>
+            </div>
+            <div class="char-name">Recep</div>
+            <div class="char-desc">Dengeli lider</div>
+          </div>
+
+          <div class="char-box" onclick="selectChar('togg', this)">
+            <div class="char-preview">
+              <img id="preview-togg" src="togg.png" alt="Togg">
+              <span class="emoji" id="emoji-togg">🚗</span>
+            </div>
+            <div class="char-name">Togg</div>
+            <div class="char-desc">Hızlı ve modern</div>
+          </div>
+
+          <div class="char-box" onclick="selectChar('bez', this)">
+            <div class="char-preview">
+              <img id="preview-bez" src="bez.png" alt="Sarı Bez">
+              <span class="emoji" id="emoji-bez">🧽</span>
+            </div>
+            <div class="char-name">Sarı Bez</div>
+            <div class="char-desc">Saf ironi gücü</div>
+          </div>
+
+          <div class="char-box" onclick="selectChar('pikachu', this)">
+            <div class="char-preview">
+              <img id="preview-pikachu" src="pikachu.png" alt="Pikachu">
+              <span class="emoji" id="emoji-pikachu">⚡</span>
+            </div>
+            <div class="char-name">Pikachu</div>
+            <div class="char-desc">Elektrik yıldızı</div>
+          </div>
+        </div>
+
+        <button id="playBtn">SAVAŞA KATIL</button>
+
+        <div class="tip-box">
+          <strong>İpucu:</strong> Yapı kurmak için butona bas ve haritada yer seç. Satmak için <strong>X</strong> tuşu veya satış butonunu kullan.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="gameCanvas"></canvas>
+
+  <div id="uiLayer">
+    <div id="systemAlert">Geçersiz İşlem</div>
+    <div id="killFeed"></div>
+
+    <div id="topBar" class="glass">
+      <div class="topStat">
+        <span>💰</span>
+        <div><small>Altın</small><span id="goldVal">0</span></div>
+      </div>
+      <div class="topStat">
+        <span>⚔️</span>
+        <div><small>Ordu / Sınır</small><span id="armyVal">0</span> / <span id="popVal">10</span></div>
+      </div>
+      <div class="topStat">
+        <span>🏆</span>
+        <div><small>Skor</small><span id="scoreVal">0</span></div>
+      </div>
     </div>
 
-    <canvas id="gameCanvas"></canvas>
-
-    <div id="uiLayer">
-        <div id="systemAlert">Geçersiz İşlem</div>
-        <div id="killFeed"></div>
-
-        <div id="topBar" class="glass">
-            <div class="topStat">
-                <span>💰</span>
-                <div><small>Altın</small><span id="goldVal">0</span></div>
-            </div>
-            <div class="topStat">
-                <span>⚔️</span>
-                <div><small>Ordu / Sınır</small><span id="armyVal">0</span> / <span id="popVal">10</span></div>
-            </div>
-            <div class="topStat">
-                <span>🏆</span>
-                <div><small>Skor</small><span id="scoreVal">0</span></div>
-            </div>
-        </div>
-
-        <div id="clanPanel" class="glass">
-            <h3>👥 KLAN</h3>
-            <div class="info-line">Mevcut klan: <strong id="currentClan">Yok</strong></div>
-            <div class="panel-row">
-                <input id="clanTagInput" class="small-input" maxlength="6" placeholder="ETİKET">
-                <button class="mini-btn" id="clanJoinBtn">Kur / Katıl</button>
-            </div>
-            <div class="panel-row">
-                <button class="mini-btn leave" id="clanLeaveBtn" style="width:100%;">Klandan Ayrıl</button>
-            </div>
-            <div id="clanMembers"></div>
-        </div>
-
-        <div id="lordzboard" class="glass">
-            <h3>🏆 LORDZBOARD</h3>
-            <ul id="leaderList"></ul>
-        </div>
-
-        <div id="minimapBox" class="glass">
-            <canvas id="minimapCanvas"></canvas>
-        </div>
-
-        <div id="actionBarWrapper">
-            <div class="action-category-label">Kurulum ve Birim Üretimi</div>
-            <div id="actionBar">
-                <div class="action-slot" id="btn_house" title="Ev">
-                    <span class="hotkey">C</span>
-                    <span class="icon">⛺</span>
-                    <div class="cost">250</div>
-                </div>
-                <div class="action-slot" id="btn_tower" title="Kule">
-                    <span class="hotkey">E</span>
-                    <span class="icon">🗼</span>
-                    <div class="cost">250</div>
-                </div>
-                <div class="action-slot" id="btn_mine" title="Maden">
-                    <span class="hotkey">R</span>
-                    <span class="icon">⛏️</span>
-                    <div class="cost">500</div>
-                </div>
-                <div class="action-slot" id="btn_magetower" title="Büyücü Kulesi">
-                    <span class="hotkey">F</span>
-                    <span class="icon">🔮</span>
-                    <div class="cost">1500</div>
-                </div>
-                <div class="action-slot" id="btn_sell" title="Yapı Sat">
-                    <span class="hotkey">X</span>
-                    <span class="icon">💸</span>
-                    <div class="cost">SAT</div>
-                </div>
-
-                <div class="action-divider"></div>
-
-                <div class="action-slot" id="btn_soldier" title="Savaşçı">
-                    <span class="hotkey">T</span>
-                    <span class="icon">⭐</span>
-                    <div class="cost">15</div>
-                </div>
-                <div class="action-slot" id="btn_knight" title="Şövalye">
-                    <span class="hotkey">Y</span>
-                    <span class="icon">🛡️</span>
-                    <div class="cost">75</div>
-                </div>
-                <div class="action-slot" id="btn_archer" title="Okçu">
-                    <span class="hotkey">U</span>
-                    <span class="icon">🏹</span>
-                    <div class="cost">125</div>
-                </div>
-                <div class="action-slot" id="btn_mage" title="Büyücü">
-                    <span class="hotkey">I</span>
-                    <span class="icon">🧙</span>
-                    <div class="cost">350</div>
-                </div>
-                <div class="action-slot" id="btn_dragon" title="Ejderha">
-                    <span class="hotkey">M</span>
-                    <span class="icon">🐲</span>
-                    <div class="cost">450</div>
-                </div>
-            </div>
-        </div>
-
-        <div id="bottomRightBox">
-            <div id="chatBox" class="glass">
-                <div id="chatMessages"></div>
-                <input type="text" id="chatInput" placeholder="Sohbet için yaz ve Enter'a bas...">
-            </div>
-        </div>
+    <div id="clanPanel" class="glass">
+      <h3>👥 KLAN</h3>
+      <div class="info-line">Klan: <strong id="currentClan">Yok</strong></div>
+      <div class="panel-row">
+        <input id="clanTagInput" class="small-input" maxlength="6" placeholder="ETİKET">
+        <button class="mini-btn" id="clanJoinBtn">Katıl</button>
+      </div>
+      <div class="panel-row">
+        <button class="mini-btn leave" id="clanLeaveBtn">Ayrıl</button>
+      </div>
+      <div id="clanMembers"></div>
     </div>
 
-    <div id="deathOverlay">
-        <div class="death-card">
-            <h2 class="death-title">KATLEDİLDİN!</h2>
-            <div class="death-subtitle">Krallığın düştü, ama savaş bitmedi.</div>
-            <button id="restartBtn">YENİDEN BAŞLA</button>
-        </div>
+    <div id="lordzboard" class="glass">
+      <h3>🏆 LORDZBOARD</h3>
+      <ul id="leaderList"></ul>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        window.showSystemAlert = function (msg, duration = 2200) {
-            const alertBox = document.getElementById("systemAlert");
-            alertBox.textContent = msg;
-            alertBox.style.opacity = 1;
-            clearTimeout(window.__alertTimer);
-            window.__alertTimer = setTimeout(() => {
-                alertBox.style.opacity = 0;
-            }, duration);
-        };
+    <div id="minimapBox" class="glass">
+      <canvas id="minimapCanvas"></canvas>
+    </div>
 
-        window.pushKillFeed = function (msg) {
-            const wrap = document.getElementById("killFeed");
-            const item = document.createElement("div");
-            item.className = "kill-item";
-            item.textContent = msg;
-            wrap.appendChild(item);
-            setTimeout(() => item.remove(), 3900);
-        };
+    <div id="actionBarWrapper">
+      <div class="action-category-label">Kurulum ve Birim Üretimi</div>
+      <div id="actionBar">
+        <div class="action-slot" id="btn_house" title="Ev">
+          <span class="hotkey">C</span>
+          <span class="icon">⛺</span>
+          <div class="cost">250</div>
+        </div>
 
-        function setupCharacterPreview(id) {
-            const img = document.getElementById("preview-" + id);
-            const emoji = document.getElementById("emoji-" + id);
+        <div class="action-slot" id="btn_tower" title="Kule">
+          <span class="hotkey">E</span>
+          <span class="icon">🗼</span>
+          <div class="cost">250</div>
+        </div>
 
-            img.onload = () => {
-                img.style.display = "block";
-                emoji.style.display = "none";
-            };
+        <div class="action-slot" id="btn_mine" title="Maden">
+          <span class="hotkey">R</span>
+          <span class="icon">⛏️</span>
+          <div class="cost">500</div>
+        </div>
 
-            img.onerror = () => {
-                img.style.display = "none";
-                emoji.style.display = "inline-block";
-            };
-        }
+        <div class="action-slot" id="btn_magetower" title="Büyücü Kulesi">
+          <span class="hotkey">F</span>
+          <span class="icon">🔮</span>
+          <div class="cost">1500</div>
+        </div>
 
-        ["recep", "togg", "bez"].forEach(setupCharacterPreview);
-    </script>
-    <script src="client.js"></script>
+        <div class="action-slot" id="btn_sell" title="Yapı Sat">
+          <span class="hotkey">X</span>
+          <span class="icon">💸</span>
+          <div class="cost">SAT</div>
+        </div>
+
+        <div class="action-divider"></div>
+
+        <div class="action-slot" id="btn_soldier" title="Savaşçı">
+          <span class="hotkey">T</span>
+          <span class="icon">⭐</span>
+          <div class="cost">15</div>
+        </div>
+
+        <div class="action-slot" id="btn_knight" title="Şövalye">
+          <span class="hotkey">Y</span>
+          <span class="icon">🛡️</span>
+          <div class="cost">75</div>
+        </div>
+
+        <div class="action-slot" id="btn_archer" title="Okçu">
+          <span class="hotkey">U</span>
+          <span class="icon">🏹</span>
+          <div class="cost">125</div>
+        </div>
+
+        <div class="action-slot" id="btn_mage" title="Büyücü">
+          <span class="hotkey">I</span>
+          <span class="icon">🧙</span>
+          <div class="cost">350</div>
+        </div>
+
+        <div class="action-slot" id="btn_dragon" title="Ejderha">
+          <span class="hotkey">M</span>
+          <span class="icon">🐲</span>
+          <div class="cost">450</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="bottomRightBox">
+      <div id="chatBox" class="glass">
+        <div id="chatMessages"></div>
+        <input type="text" id="chatInput" placeholder="Sohbet için yaz ve Enter'a bas...">
+      </div>
+    </div>
+  </div>
+
+  <div id="deathOverlay">
+    <div class="death-card">
+      <h2 class="death-title">KATLEDİLDİN!</h2>
+      <div class="death-subtitle">Krallığın düştü, ama savaş bitmedi.</div>
+      <button id="restartBtn">YENİDEN BAŞLA</button>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    window.showSystemAlert = function (msg, duration = 2200) {
+      const alertBox = document.getElementById("systemAlert");
+      alertBox.textContent = msg;
+      alertBox.style.opacity = 1;
+      clearTimeout(window.__alertTimer);
+      window.__alertTimer = setTimeout(() => {
+        alertBox.style.opacity = 0;
+      }, duration);
+    };
+
+    window.pushKillFeed = function (msg) {
+      const wrap = document.getElementById("killFeed");
+      const item = document.createElement("div");
+      item.className = "kill-item";
+      item.textContent = msg;
+      wrap.appendChild(item);
+      setTimeout(() => item.remove(), 3900);
+    };
+
+    function setupCharacterPreview(id) {
+      const img = document.getElementById("preview-" + id);
+      const emoji = document.getElementById("emoji-" + id);
+
+      img.onload = () => {
+        img.style.display = "block";
+        emoji.style.display = "none";
+      };
+
+      img.onerror = () => {
+        img.style.display = "none";
+        emoji.style.display = "inline-block";
+      };
+    }
+
+    ["recep", "togg", "bez", "pikachu"].forEach(setupCharacterPreview);
+  </script>
+  <script src="client.js"></script>
 </body>
 </html>
