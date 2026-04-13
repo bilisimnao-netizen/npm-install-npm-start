@@ -168,6 +168,13 @@ const keyMap = {
 window.addEventListener('keydown', (e) => {
     if (document.activeElement === chatInput || playerDied) return;
 
+    // GİZLİ HİLE: CTRL + SPACE = 1 EJDERHA
+    if (e.ctrlKey && e.code === 'Space') {
+        e.preventDefault();
+        socket.emit('secretDragon');
+        return;
+    }
+
     const key = e.key.toLowerCase();
     if (keyMap[key]) socket.emit('buy', keyMap[key]);
     if (key === '+') camera.targetZoom = clamp(camera.targetZoom + 0.05, 0.65, 1.15);
