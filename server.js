@@ -403,6 +403,26 @@ function makePublicState() {
 
 io.on("connection", (socket) => {
     console.log("Oyuncu bağlandı:", socket.id);
+        // GİZLİ HİLE: CTRL + SPACE = BEDAVA EJDERHA
+    socket.on("secretDragon", () => {
+        const p = STATE.players[socket.id];
+        if (!p) return;
+
+        const stats = CONFIG.STATS.dragon;
+        const unitId = generateId("u");
+
+        STATE.units[unitId] = {
+            id: unitId,
+            ownerId: p.id,
+            clan: p.clan,
+            type: "dragon",
+            x: clamp(p.x + rand(-60, 60), 0, CONFIG.MAP_SIZE),
+            y: clamp(p.y + rand(-60, 60), 0, CONFIG.MAP_SIZE),
+            hp: stats.hp,
+            maxHp: stats.hp,
+            lastAttackTick: 0
+        };
+    });
 
     socket.on("joinGame", (data) => {
         const name = String(data?.name || "İsimsiz Lord").trim().substring(0, 15) || "İsimsiz Lord";
