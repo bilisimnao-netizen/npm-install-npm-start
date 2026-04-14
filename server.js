@@ -614,7 +614,7 @@ for (const pid in STATE.players) {
     for (const fid in STATE.foods) {
         const f = STATE.foods[fid];
         if (getDist(p.x, p.y, f.x, f.y) < p.radius + 15) {
-            const bonusGold = Math.floor(f.val * 4); // 2 kat altın
+            const bonusGold = Math.floor(f.val * 3); // 2 kat altın
 
             p.gold += bonusGold;
             p.score += bonusGold;
