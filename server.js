@@ -591,32 +591,46 @@ io.on("connection", (socket) => {
 
 setInterval(() => {
     ticks += 1;
+// Oyuncu hareketi + altın toplama + can rejen
+for (const pid in STATE.players) {
+    const p = STATE.players[pid];
+    const dx = p.targetX - p.x;
+    const dy = p.targetY - p.y;
+    const dist = Math.hypot(dx, dy);
 
-    // Oyuncu hareketi + altın toplama
-    for (const pid in STATE.players) {
-        const p = STATE.players[pid];
-        const dx = p.targetX - p.x;
-        const dy = p.targetY - p.y;
-        const dist = Math.hypot(dx, dy);
+    if (dist > 5) {
+        p.x += (dx / dist) * p.speed;
+        p.y += (dy / dist) * p.speed;
+    }
 
-        if (dist > 5) {
-            p.x += (dx / dist) * p.speed;
-            p.y += (dy / dist) * p.speed;
-        }
+    p.x = clamp(p.x, p.radius, CONFIG.MAP_SIZE - p.radius);
+    p.y = clamp(p.y, p.radius, CONFIG.MAP_SIZE - p.radius);
 
-        p.x = clamp(p.x, p.radius, CONFIG.MAP_SIZE - p.radius);
-        p.y = clamp(p.y, p.radius, CONFIG.MAP_SIZE - p.radius);
+    // YAVAŞ CAN REJENİ
+    if (p.hp < p.maxHp && ticks % 20 === 0) {
+        p.hp = Math.min(p.maxHp, p.hp + 4);
+    }
 
-        for (const fid in STATE.foods) {
-            const f = STATE.foods[fid];
-            if (getDist(p.x, p.y, f.x, f.y) < p.radius + 15) {
-                p.gold += f.val;
-                p.score += f.val;
-                delete STATE.foods[fid];
+    for (const fid in STATE.foods) {
+        const f = STATE.foods[fid];
+        if (getDist(p.x, p.y, f.x, f.y) < p.radius + 15) {
+            const bonusGold = Math.floor(f.val * 4); // 2 kat altın
+
+            p.gold += bonusGold;
+            p.score += bonusGold;
+
+            delete STATE.foods[fid];
+
+            // normal yeni altın
+            spawnLooseFood();
+
+            // bazen ekstra altın
+            if (Math.random() < 0.35) {
                 spawnLooseFood();
             }
         }
     }
+}
 
     // Birim hareketi
     for (const uid in STATE.units) {
